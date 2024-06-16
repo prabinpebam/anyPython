@@ -7,3 +7,7 @@ That way I can use this node in combination with a Custom node like the Ollama n
 As of the current version, I've created separate nodes for no input, 1 input and 2 inputs. The input also currently takes only sting as input.
 
 Let me know in the discussion how you would use this node.
+
+
+![ComfyUI anyPython example workflow](/resources/img/comfyUI-anyPython-example-workflow.png)
+
