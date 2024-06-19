@@ -12,6 +12,7 @@ from io import StringIO
 # Import html formatting stuff
 from bs4 import BeautifulSoup
 from prettytable import PrettyTable
+import datetime
 
 # Import Additional common libs
 import os, json, random, string, sys, math, datetime, collections, itertools, functools, urllib, shutil, re, torch, time, decimal, matplotlib, io, base64, wave, chromadb, uuid, scipy, torchaudio, torchvision, cv2, PIL
@@ -28,108 +29,46 @@ import importlib
 
 import re
 
-
-class anyPythonZeroinput:     
-
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {"required": {       
-                    "code": ("STRING", {"multiline": True, "default": "print('Hello, World!')"}),
-                    }
-                }
-
-    RETURN_TYPES = ("STRING",)
-    FUNCTION = "execute_code"
-    CATEGORY = "🚀 Any Python"
-
-    def execute_code(self, code):        
-
-        # Redirect stdout to capture print statements
-        old_stdout = sys.stdout
-        redirected_output = sys.stdout = StringIO()
-        
-        try:
-            # Execute the Python code safely
-            exec(code)
-        except Exception as e:
-            return (str(e),)
-        finally:
-            # Restore stdout
-            sys.stdout = old_stdout
-        
-        # Get the output and return it as a tuple
-        output = redirected_output.getvalue()
-        return (output,)
-
-        
-class anyPythonOneInput:     
+class anyPython:     
 
     @classmethod
     def INPUT_TYPES(cls):
         return {"required": {       
-                    "code": ("STRING", {"multiline": True, "default": "print(variable)"}),                    
-                    "variable": ("STRING", {"multiline": True, "default": "5"}),             
-                    }
+                    "code": ("STRING", {"multiline": True, "default": "print(variable)"}),                              
+                    },
+                "optional": {   
+                    "variable": ("STRING", {"multiline": True, "default": "5"}),
+                    "image": ("IMAGE",),            
+                    },
                 }
 
-    RETURN_TYPES = ("STRING",)
+    # Define the return type as a tuple with both STRING and IMAGE
+    RETURN_TYPES = ("STRING", "IMAGE")
     FUNCTION = "execute_code"
     CATEGORY = "🚀 Any Python"
 
-    def execute_code(self, code, variable):
+    def execute_code(self, code, variable=None, image=None):
         # Redirect stdout to capture print statements
         old_stdout = sys.stdout
         redirected_output = sys.stdout = StringIO()
-        
-        # Create a local dictionary to hold the variable
-        local_vars = {"variable": variable}
-        
-        try:
-            # Execute the Python code safely within the local scope
-            exec(code, {}, local_vars)
-        except Exception as e:
-            return (str(e),)
-        finally:
-            # Restore stdout
-            sys.stdout = old_stdout
-        
-        # Get the output and return it as a tuple
-        output = redirected_output.getvalue()
-        return (output,)
 
-
-class anyPythonTwoInputs:     
-
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {"required": {       
-                    "code": ("STRING", {"multiline": True, "default": "print(variable1, variable2)"}),                    
-                    "variable1": ("STRING", {"multiline": True, "default": "5"}),             
-                    "variable2": ("STRING", {"multiline": True, "default": "10"}),             
-                    }
-                }
-
-    RETURN_TYPES = ("STRING",)
-    FUNCTION = "execute_code"
-    CATEGORY = "🚀 Any Python"
-
-    def execute_code(self, code, variable1, variable2):
-        # Redirect stdout to capture print statements
-        old_stdout = sys.stdout
-        redirected_output = sys.stdout = StringIO()
-        
         # Create a local dictionary to hold the variables
-        local_vars = {"variable1": variable1, "variable2": variable2}
-        
+        local_vars = {"variable": variable}
+
+        # Include the image in local_vars if it's provided
+        if image is not None:
+            local_vars["image"] = image
+
         try:
             # Execute the Python code safely within the local scope
             exec(code, {}, local_vars)
         except Exception as e:
-            return (str(e),)
+            # Return the error message and None for the image
+            return (str(e), None)
         finally:
             # Restore stdout
             sys.stdout = old_stdout
-        
-        # Get the output and return it as a tuple
+
+        # Get the output and return it along with the image as a tuple
         output = redirected_output.getvalue()
-        return (output,)
+        return (output, image)
