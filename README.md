@@ -7,13 +7,14 @@ A custom node for ComfyUI where you can paste/type any python code and it will g
 ComfyUI has a lot of custom nodes but you will still have a special use case for which there's no custom nodes available. You don't need to know how to write python code yourself. Use a LLM to generate the code you need, paste it in the node and voila!! you have your custom node which does exactly what you need.
 
 Here's some example use cases for which I've used this node.
-- For a given API, I want to get the json data and get a specific value. eg. I wnat current temperature of a place using weather API.
+- For a given API, I want to get the json data and get a specific value. eg. I want the current temperature of a place using the weather API.
 - I want the current date, time, day etc.
 - For a given image, I want to calculate the dominant color and calculate a foreground color with proper contrast that can be used as font color to overlay on the image.
 - For a given RGB color, convert it into hex value.
 - For a given url, return the html
 - For a given html, return all the text content with markdown syntax.
 - set a given image as the wallpaper of my Win 11 PC.
+- Fetch the text content from a url, summarize the text using a LLM and put the summary in a powerpoint file.
 
 
 This node was inspired by [AnyNode](https://github.com/lks-ai/anynode).
