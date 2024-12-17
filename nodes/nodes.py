@@ -11,7 +11,6 @@ from io import StringIO
 
 # Import html formatting stuff
 from bs4 import BeautifulSoup
-from prettytable import PrettyTable
 import datetime
 
 # Import Additional common libs
