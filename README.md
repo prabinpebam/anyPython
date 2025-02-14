@@ -1,7 +1,8 @@
-# 🚀 anyPython 0.0.2
+# 🚀 anyPython 0.0.3
 
-## 0.0.2 changes
+## 0.0.3 changes
 Updated for the node to work with the latest ComfyUI version as of 14th Fen 2025.
+Avoided using exec and eval fucntion to meet security requirements of ComfyUI.
 
 A custom node for ComfyUI where you can paste/type any python code and it will get executed when you run the workflow.
 
