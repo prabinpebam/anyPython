@@ -1,4 +1,4 @@
-"""Top-level package for anypython."""
+"""Top-level package for anyPython."""
 
 __all__ = [
     "NODE_CLASS_MAPPINGS",

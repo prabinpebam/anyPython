@@ -3,7 +3,7 @@ requires = ["setuptools>=70.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "anypython"
+name = "anyPython"
 version = "0.0.2"
 description = "A custom node for ComfyUI where you can paste/type any python code and it will get executed when you run the workflow."
 authors = [

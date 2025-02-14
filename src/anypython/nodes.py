@@ -1,7 +1,7 @@
 """
 @author: prabinpebam
-@title: AnyPython v0.1
-@nickname: AnyPython
+@title: anyPython v0.1
+@nickname: anyPython
 @description: This node can take any input and use that to run a python script in ComfyUI
 """
 
