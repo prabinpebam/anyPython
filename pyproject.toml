@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "anyPython"
-version = "0.0.2"
+version = "0.0.3"
 description = "A custom node for ComfyUI where you can paste/type any python code and it will get executed when you run the workflow."
 authors = [
   {name = "Prabin Pebam", email = "prabinpebam@gmail.com"}
