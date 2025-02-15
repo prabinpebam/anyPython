@@ -24,7 +24,7 @@ Here's some example use cases for which I've used this node.
 
 Let me know in the discussion how you would use this node.
 
-# TLDR: Writing Python Code for anyPython Custom Node
+# TLDR: Writing Python Code for anyPython
 
 ## Key Points:
 - **Execution Environment:**  
@@ -65,7 +65,7 @@ image = output_tensor
 ```
 
 
-# Guide for Writing Python Code for ComfyUI Custom Node
+# Guide for Writing Python Code for anyPython
 
 This guide explains how to write proper Python code to be used in a ComfyUI custom node. It covers how inputs and outputs are defined, what is allowed or not allowed, and provides example snippets.
 
