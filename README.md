@@ -1,15 +1,13 @@
 # 🚀 anyPython 0.0.3
+A custom node for ComfyUI where you can paste/type any python code and it will get executed when you run the workflow.
 
 ## 0.0.3 changes
 Updated for the node to work with the latest ComfyUI version as of 14th Feb 2025.
 Avoided using exec and eval fucntion to meet security requirements of ComfyUI.
+Introduced a toggle button that restricts risky code by default. Risk message is given. User have to explicitly turn it on to run risky code.
 
-
-# 🚀 anyPython 0.0.3
-A custom node for ComfyUI where you can paste/type any python code and it will get executed when you run the workflow.
 
 ## Why this node?
------------
 ComfyUI has a lot of custom nodes but you will still have a special use case for which there's no custom nodes available. You don't need to know how to write python code yourself. Use a LLM to generate the code you need, paste it in the node and voila!! you have your custom node which does exactly what you need.
 
 Here's some example use cases for which I've used this node.
