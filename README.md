@@ -62,7 +62,7 @@ output_tensor = transforms.ToTensor()(processed_img)
 # Define outputs
 output = "Processing complete."
 image = output_tensor
-
+```
 
 
 # Guide for Writing Python Code for ComfyUI Custom Node
