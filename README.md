@@ -1,9 +1,11 @@
 # 🚀 anyPython 0.0.3
 
 ## 0.0.3 changes
-Updated for the node to work with the latest ComfyUI version as of 14th Fen 2025.
+Updated for the node to work with the latest ComfyUI version as of 14th Feb 2025.
 Avoided using exec and eval fucntion to meet security requirements of ComfyUI.
 
+
+# 🚀 anyPython 0.0.3
 A custom node for ComfyUI where you can paste/type any python code and it will get executed when you run the workflow.
 
 ## Why this node?
@@ -20,35 +22,197 @@ Here's some example use cases for which I've used this node.
 - set a given image as the wallpaper of my Win 11 PC.
 - Fetch the text content from a url, summarize the text using a LLM and put the summary in a powerpoint file.
 
-
-This node was inspired by [AnyNode](https://github.com/lks-ai/anynode).
-You can use this node in combination with a Custom node like the [Ollama node](https://github.com/stavsap/comfyui-ollama) that can generate the python code and feed into this node.
-
 Let me know in the discussion how you would use this node.
 
-## Instruction for usage
------------
-- The string variable will be passed as a local variable called "variable". You can directly used "variable" in your code and it should work. In case what you are passing is an int or float, you might have to declare the variable as int or float to make it work.
-- Images are passed as a tensor image object in ComfyUI. You will need to write your own python code to convert that image into what you need in order to use it in your python code. Refer examples in the workflow folder on how the image node has been used.
+# TLDR: Writing Python Code for anyPython Custom Node
 
-Here's an example of a python script that I used in order to take a single image as input and convert it to pil image.
+## Key Points:
+- **Execution Environment:**  
+  Your code runs as a module with pre-defined globals:
+  - `variable` (string, optional)
+  - `image` (tensor)
+  - `confirm_risks` (boolean)
+
+- **Input & Output Handling:**  
+  - **Input Image:** Provided as a tensor.  
+    → Convert to a PIL image for processing if needed, then convert back to a tensor.
+  - **Outputs:**  
+    - Set global `output` (string) or use `print()` for text output.
+    - Set global `image` (tensor) for the image output.
+
+- **Allowed:**  
+  Standard Python code (functions, loops, imports).  
+  External libraries (note: risky modules require risk confirmation).
+
+- **Not Allowed:**  
+  Top-level `return` statements.  
+  Modifying system/environment state outside allowed globals.
+
+## Example Skeleton:
+```python
+# Convert tensor to PIL image (for processing)
+pil_img = tensor_to_pil(image)
+
+# Process the image (e.g., create stipple art)
+processed_img = create_stipple_art(pil_img)
+
+# Convert the processed image back to tensor
+output_tensor = transforms.ToTensor()(processed_img)
+
+# Define outputs
+output = "Processing complete."
+image = output_tensor
+
+
+
+# Guide for Writing Python Code for ComfyUI Custom Node
+
+This guide explains how to write proper Python code to be used in a ComfyUI custom node. It covers how inputs and outputs are defined, what is allowed or not allowed, and provides example snippets.
+
+---
+
+## 1. Understanding the Node’s Execution Environment
+
+- **Execution Context:**  
+  Your code is written to a temporary file and executed using `runpy.run_path`. This means it runs as a module (i.e., top-level code) without the typical `if __name__ == '__main__':` guard.
+
+- **Input Variables:**  
+  The node creates a globals dictionary that includes:
+  - `variable`: A string value (if provided).
+  - `image`: An image input, always provided as a tensor.
+  - `confirm_risks`: A boolean indicating whether you accept potential security risks.
+
+- **Risk Confirmation:**  
+  The node scans your code for risky operations (e.g., use of `os`, `sys`, or `subprocess`). If risky code is detected and `confirm_risks` is not set to `True`, execution is halted with a warning.
+
+---
+
+## 2. Defining the Outputs
+
+The node expects **two outputs**:
+
+- **String Output:**
+  - The global variable `output` should hold the string output.
+  - Alternatively, if `output` is not set, any text printed using `print()` is captured as the output.
+
+- **Image Output:**
+  - The global variable `image` should contain the image output.
+  - **Important:** Since the input image is provided as a tensor, if you process the image as a PIL image, you must convert it back to a tensor before assigning it to `image`.
+
+---
+
+## 3. What Is Allowed and What Is Not
+
+### Allowed:
+- **Standard Python Code:**  
+  You can write any valid Python code, define functions, use loops, etc.
+- **Setting Globals for Output:**  
+  Assign your final outputs to the global variables `output` and `image`.
+- **Printing to Standard Output:**  
+  Using `print("message")` is acceptable; the printed text will be captured if `output` is not defined.
+- **Using External Libraries:**  
+  Libraries such as `torch`, `numpy`, `PIL`, etc., can be imported.  
+  *Caution:* Some modules (like `os`, `sys`, `subprocess`) are flagged as risky and require risk confirmation.
+
+### Not Allowed / Cautions:
+- **Top-Level `return` Statements:**  
+  Do not use a top-level `return` statement in your code. Instead, assign the outputs to the globals.
+- **Modifying the Node’s Environment:**  
+  Avoid interfering with the provided globals (other than `output` and `image`) or modifying system-level settings without confirming risks.
+- **Ignoring the Input Format:**  
+  The input `image` is always a tensor. Convert it to a PIL image for processing if needed, then convert it back to a tensor before setting the output.
+
+---
+
+## 4. Suggested Code Structure
+
+Below is a sample structure for your code:
 
 ```python
+# --- Import necessary libraries ---
 import torch
 import torchvision.transforms as transforms
-from PIL import Image
+from PIL import Image, ImageDraw
+import numpy as np
+import random
 
-# Assuming 'image' is your tensor image object with incorrect dimensions
-# Correcting the dimensions if they are in (batch size, height, width, channels) format
-if image.shape[1] > 4:  # More than 4 channels suggests incorrect dimension order
-    image = image.permute(0, 3, 1, 2)  # Rearrange to (batch size, channels, height, width)
+# --- Helper Function to Convert Tensor to PIL Image ---
+def tensor_to_pil(image_tensor):
+    """
+    Convert an image tensor to a PIL image.
+    If the tensor is in (batch, height, width, channels) format,
+    it will be permuted to (batch, channels, height, width) and squeezed.
+    """
+    if image_tensor.dim() == 4:
+        if image_tensor.shape[1] > 4:  # Likely (batch, height, width, channels)
+            image_tensor = image_tensor.permute(0, 3, 1, 2)
+        image_tensor = image_tensor.squeeze(0)
+    return transforms.ToPILImage()(image_tensor)
 
-# Continue with conversion and saving as before
-image = image.squeeze(0)  # Remove the batch dimension
-transform = transforms.ToPILImage()
-pil_image = transform(image)
+# --- Example Processing Function (e.g., creating stipple art) ---
+def create_stipple_art(pil_img):
+    width, height = pil_img.size
+    # Create a new image with a dark background
+    stipple_img = Image.new("RGB", (width, height), (51, 51, 51))
+    draw = ImageDraw.Draw(stipple_img)
+    
+    # Example: Draw random white dots on the image
+    for _ in range(500):
+        x = random.randint(0, width - 1)
+        y = random.randint(0, height - 1)
+        dot_radius = random.randint(1, 3)
+        draw.ellipse([x - dot_radius, y - dot_radius, x + dot_radius, y + dot_radius], fill=(255, 255, 255))
+    
+    return stipple_img
 
+# --- Main Code Execution ---
+# The input variables 'variable' and 'image' are provided automatically.
+# 'image' is a tensor. Convert it to a PIL image for processing.
+if image is None:
+    raise ValueError("No image tensor provided")
+
+# Convert tensor to PIL image for processing.
+pil_img = tensor_to_pil(image)
+
+# Process the image (for example, create stipple art)
+processed_img = create_stipple_art(pil_img)
+
+# Convert the processed PIL image back to a tensor.
+to_tensor = transforms.ToTensor()
+output_tensor = to_tensor(processed_img)
+
+# --- Define Global Outputs ---
+# For textual output:
+output = "Stipple art created successfully."
+
+# For image output (as a tensor to match the input format):
+image = output_tensor
+
+# Note:
+# Do not use a 'return' statement in this code.
 ```
+
+---
+
+## 5. Key Points Recap
+
+- **Input Variables:**
+  - `variable` (string) – optional.
+  - `image` (tensor) - (Optional) – the image input (must be converted if processing as a PIL image).
+  - `confirm_risks` (boolean) – This is off by default. The code will not run if risk is detected. Check the string output for risk message. Toggle this on if you still want to run the script.
+
+- **Output Variables:**
+  - `output` (string) – if not defined, printed output is captured.
+  - `image` (tensor) – must match the format of the input image.
+
+- **Allowed Code:**
+  - Standard Python code, function definitions, imports (with caution for risky modules), and assignment to globals.
+  - **Avoid:** Top-level return statements or modifying system state without proper risk confirmation.
+
+---
+
+By following this structure and these guidelines, you can ensure that your Python code will execute properly within the ComfyUI custom node environment with the correct handling of both string and image outputs.
+
 
 ![ComfyUI anyPython example workflow](/resources/img/comfyUI-anyPython-example-workflow.png)
 
